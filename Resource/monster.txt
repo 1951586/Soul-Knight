@@ -1,0 +1,10 @@
+1.如果场景的成员里有hero了，将场景作为参数传入即可
+如：
+auto snowman = Snowman::createMonsterSprite(Point(0, 0), this);
+	dynamicLayer->addChild(snowman, 5);
+若场景的成员里没有hero，则需要
+snowman->getHeroInstance
+
+2.获取怪物坐标直接对怪物getPosition，与上一版本不同
+例：
+snowman->getPosition.x
