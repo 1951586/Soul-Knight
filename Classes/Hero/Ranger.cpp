@@ -18,33 +18,38 @@ Ranger* Ranger::createHeroSprite(Point position, Scene* scene)
 void Ranger::heroInit(Point position, Scene* scene)//初始化状态，可自行修改
 {
 	//设置基本参数
-	dx = 0, dy = 0;
-	dx_ = 0, dy_ = 0;
-	faceDirection = 1;
-	isRun = 0;
 	velocity = 7;//设置速度大小
-	lifeNumber =5;
-	powerNumber = 180;
-	shieldNumber = 4;
+	lifeNumberMax =5;
+	lifeNumberNow = lifeNumberMax;
+	powerNumberMax = 180;
+	powerNumberNow = powerNumberMax;
+	shieldNumberMax = 4;
+	shieldNumberNow = shieldNumberMax;
 	goldCoin = 0;
-	isAbility = true;
 	abilityInterval = 40;
-	count = 0;
+	rotateDistance = 300;//设置技能距离
+	//共同数据初始化
+	commonDataInit();
 	//初始状态
-	this->position = position;
+	this->setPosition(position);
 	sprite = Sprite::create("Map/Ranger1.png");
-	sprite->setPosition(position);
+	//sprite->setPosition(position);
 	this->addChild(sprite, 1);
 	setAction(1);
 	//加入摇杆并让rocker位于父节点中
 	auto rocker = HRocker::createHRocker("Map/Rocker.png", "Map/RockerBG.png", Point(150, 150), this);
 	this->rocker = rocker;
-	scene->addChild(rocker, 30);
-	scene->addChild(this, 31);
+	scene->addChild(rocker);
+	//scene->addChild(this, 31);
+	//加入父节点
+	this->scene = scene;
 	//设置大小
-	this->setScale(0.6);
-	//设置技能距离
-	rotateDistance = 500;
+	scale = 0.6;
+	this->setScale(scale);
+	//设置锚点
+	this->setAnchorPoint(Vec2(0, 0));
+	//初始化展示信息
+	initInformation();
 	//注册定时器,间隔为0.02秒
 	this->schedule(schedule_selector(Ranger::myUpdate), 0.02f);
 }
@@ -95,6 +100,14 @@ void Ranger::ability()
 	auto spawn = Spawn::create(animate, move, NULL);
 	auto sequence = Sequence::create(spawn, callFunc, NULL);
 	sprite->runAction(sequence);
+	/*
+	if (withScene)
+	{
+		//获取运动图层
+		auto layer = static_cast<Layer*>(scene->getChildByTag(-3));
+		layer->runAction(move->clone()->reverse());
+	}
+	*/
 }
 
 //private:
@@ -144,8 +157,8 @@ void Ranger::afterAbility()
 MoveBy* Ranger::abilityMoveBy()
 {
 	float r = sqrt(pow(dx_, 2)+ pow(dy_, 2));
-	dx_ = (dx_ / r) * rotateDistance;
-	dy_ = (dy_ / r) * rotateDistance;
+	dx_ = (dx_ / r) * rotateDistance/scale;
+	dy_ = (dy_ / r) * rotateDistance/scale;
 	auto move = MoveBy::create(0.2, Vec2(dx_, dy_));
 	return move;
 }
