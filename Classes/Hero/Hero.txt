@@ -1,0 +1,29 @@
+一、英雄类
+Hero(基类)
+Knight /Sorcerer/Ranger(骑士、法师、游侠)【派生于Hero】
+用法：
+①先包含对应头文件，然后再Scene的init()中加入类似下面的代码：
+         auto knight = Knight::createHeroSprite(Point(790, 620)，this);
+         dynamicLayer->addChild(knight, 5);//!!这个版本中又改了下，还是在要场景的图层中addChild
+②摇杆设置：（以knight为例）
+          knight->startTouchRocker();//使用虚拟摇杆
+          knight->startKeyRocker();//使用键盘摇杆：W：向上；D：向右；S：向下；A：向左；P：发动技能（法师和骑士的这次改了一下）；K：发动攻击；L：切换武器（如果有的话）
+③信息显示：
+          knight->showInformation();//展示信息
+          knight->hideInformation();//隐藏信息
+④与场景互动:
+          knight->moveWithScene();//与场景一起动
+          knight->moveWithoutScene();//场景不动
+⑤内部数据调整：可改变速度，大小，生命值等信息，如：
+          knight->velocity=7;
+          kinght->lifeNumberNow=3;
+⑥获取相对父节点的坐标：
+          knight->position;//!!!这次我又改了下（主要是为了方便游侠的技能实现），还是保留了position，这次就不要用knight->getPositionX()了
+⑦添加或切换武器：
+         knight->changeWeapon(weapon);//参数是Weapon的指针
+二、HomeScene
+主要是为了防止场景动时，信息板也动，在scene中加了两个图层。另外把传送门设置成了障碍物（测试）
+          dynamicLayer,标签是-3；
+          staticLayer,标签是-2；
+          
+          

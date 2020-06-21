@@ -1,8 +1,10 @@
-#include "Knight.h"
-#include "HRocker.h"
+#include "Hero/Knight.h"
+#include "Hero/HRocker.h"
+#include "Weapon/Weapon.h"
+//#include "FightScene.h"
 USING_NS_CC;
 
-Knight* Knight::createHeroSprite(Point position,Scene* scene)
+Knight* Knight::createHeroSprite(Point position, FightScene* scene)
 {
 	Knight* hero = new Knight();
 	if (hero && hero->init())
@@ -15,7 +17,7 @@ Knight* Knight::createHeroSprite(Point position,Scene* scene)
 	return NULL;
 }
 
-void Knight::heroInit(Point position, Scene* scene)
+void Knight::heroInit(Point position, FightScene* scene)
 {
 	//设置基本参数
 	velocity = 6;//设置速度大小
@@ -26,12 +28,18 @@ void Knight::heroInit(Point position, Scene* scene)
 	shieldNumberMax = 6;
 	shieldNumberNow = shieldNumberMax;
 	goldCoin = 0;
-	abilityInterval = 300;
-	//共同数据初始化
-	commonDataInit();
+	name = "Knight";
+	//abilityInterval = 300;//300*0.02=6s
+	//技能时间与间隔时间
+	abilityBetweenTime = 8;
+	abilityTime = 4;
+	//护盾恢复时间
+	recoverTime = 2;
 	//初始状态
 	this->setPosition(position);
-	sprite = Sprite::create("Map/Knight3.png");
+	sprite = Sprite::create("character/Knight.png");
+	//sprite->setAnchorPoint(Vec2(0, 0));
+	//addChild(weaponNow,3);
 	//sprite->setPosition(position);
 	this->addChild(sprite,1);
 	setAction(1);
@@ -50,13 +58,16 @@ void Knight::heroInit(Point position, Scene* scene)
 	//设置锚点
 	this->setAnchorPoint(Vec2(0, 0));
 	//注册定时器,间隔为0.02秒
-	this->schedule(schedule_selector(Knight::myUpdate),0.02f);
+	this->schedule(schedule_selector(Knight::myUpdate),betweenTime);
+	//共同数据初始化
+	commonDataInit();
+	
 }
 
 Animate* Knight::createAnimate(int status)
 {
 	auto* m_frameCache = SpriteFrameCache::getInstance();
-	m_frameCache->addSpriteFramesWithFile("Map/KnightPictures.plist", "Map/KnightPictures.png");//使用图集
+	m_frameCache->addSpriteFramesWithFile("character/KnightPictures.plist", "character/KnightPictures.png");//使用图集
 	Vector<SpriteFrame*> frameArry;
 	if (status == 1)//向右站立（动画）
 	{
@@ -95,7 +106,29 @@ void Knight::ability()
 	fire->setPosition(0,35);
 	fire->setStartSize(100);
 	fire->setEndSize(120);
-	fire->setDuration(5.0f);//设置显示时间
+	fire->setDuration(abilityTime);//设置显示时间
 	fire->setLife(0.15);
 	this->addChild(fire,0);
+	for (int i = 0; i < weapon.size(); i++)
+	{
+		weapon[i]->speed = weapon[i]->speed / 2;
+	}
+	if (weaponNow != nullptr)
+	{
+		attackTime = weaponNow->speed / betweenTime;
+	}
+	abilityCount_ = abilityTime / betweenTime;
+}
+
+void Knight::removeAbilityFunction()
+{
+	if (weaponNow)
+	{
+		
+		for (int i = 0; i < weapon.size(); i++)
+		{
+			weapon[i]->speed = weapon[i]->speed * 2;
+		}
+		attackTime = weaponNow->speed / betweenTime;
+	}
 }

@@ -1,8 +1,9 @@
-#include "Sorcerer.h"
-#include "HRocker.h"
+#include "Hero/Sorcerer.h"
+#include "Hero/HRocker.h"
+#include "Weapon/Weapon.h"
 USING_NS_CC;
 
-Sorcerer* Sorcerer::createHeroSprite(Point position, Scene* scene)
+Sorcerer* Sorcerer::createHeroSprite(Point position, FightScene* scene)
 {
 	Sorcerer* hero = new Sorcerer();
 	if (hero && hero->init())
@@ -15,7 +16,7 @@ Sorcerer* Sorcerer::createHeroSprite(Point position, Scene* scene)
 	return NULL;
 }
 
-void Sorcerer::heroInit(Point position, Scene* scene)
+void Sorcerer::heroInit(Point position, FightScene* scene)
 {
 	//设置基本参数
 	velocity = 6;//设置速度大小
@@ -26,12 +27,15 @@ void Sorcerer::heroInit(Point position, Scene* scene)
 	shieldNumberMax = 7;
 	shieldNumberNow = shieldNumberMax;
 	goldCoin = 0;
-	abilityInterval = 300;
-	//共同数据初始化
-	commonDataInit();
+	name = "Sorcerer";
+	//abilityInterval = 300;
+	abilityBetweenTime = 10;
+	abilityTime = 5;
+	//护盾恢复时间
+	recoverTime = 2;
 	//初始状态
 	this->setPosition(position);
-	sprite = Sprite::create("Map/ant1.png");
+	sprite = Sprite::create("character/sorcerer.png");
 	//sprite->setPosition(position);
 	this->addChild(sprite, 1);
 	setAction(1);
@@ -50,13 +54,15 @@ void Sorcerer::heroInit(Point position, Scene* scene)
 	//设置锚点
 	this->setAnchorPoint(Vec2(0, 0));
 	//注册定时器,间隔为0.02秒
-	this->schedule(schedule_selector(Sorcerer::myUpdate), 0.02f);
+	this->schedule(schedule_selector(Sorcerer::myUpdate), betweenTime);
+	//共同数据初始化
+	commonDataInit();
 }
 
 Animate* Sorcerer::createAnimate(int status)
 {
 	auto* m_frameCache = SpriteFrameCache::getInstance();
-	m_frameCache->addSpriteFramesWithFile("Map/SorcererPictures.plist", "Map/SorcererPictures.png");//使用图集
+	m_frameCache->addSpriteFramesWithFile("character/SorcererPictures.plist", "character/SorcererPictures.png");//使用图集
 	Vector<SpriteFrame*> frameArry;
 	if (status == 1)
 	{
@@ -88,13 +94,18 @@ Animate* Sorcerer::createAnimate(int status)
 	return Animate::create(animation);
 }
 
-void Sorcerer::ability()//还没写
+void Sorcerer::ability()
 {
 	auto galaxy = ParticleGalaxy::create();//暂时用星系粒子
 	galaxy->setPosition(0, 35);
 	galaxy->setStartSize(180);
 	galaxy->setEndSize(200);
-	galaxy->setDuration(5.0f);//设置显示时间
+	galaxy->setDuration(abilityTime);//设置显示时间
 	galaxy->setLife(0.5);
 	this->addChild(galaxy, 0);
+}
+//技能攻击效果
+void Sorcerer::removeAbilityFunction()
+{
+
 }

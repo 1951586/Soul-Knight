@@ -1,8 +1,10 @@
-#include "Ranger.h"
-#include "HRocker.h"
+#include "Hero/Ranger.h"
+#include "Hero/HRocker.h"
+#include "Weapon/Weapon.h"
+#include "Scene/FightScene.h"
 #include <cmath>
 #include <algorithm>
-Ranger* Ranger::createHeroSprite(Point position, Scene* scene)
+Ranger* Ranger::createHeroSprite(Point position, FightScene* scene)
 {
 	Ranger* hero = new Ranger();
 	if (hero && hero->init())
@@ -15,10 +17,10 @@ Ranger* Ranger::createHeroSprite(Point position, Scene* scene)
 	return NULL;
 }
 
-void Ranger::heroInit(Point position, Scene* scene)//初始化状态，可自行修改
+void Ranger::heroInit(Point position, FightScene* scene)//初始化状态，可自行修改
 {
 	//设置基本参数
-	velocity = 7;//设置速度大小
+	velocity = 6;//设置速度大小
 	lifeNumberMax =5;
 	lifeNumberNow = lifeNumberMax;
 	powerNumberMax = 180;
@@ -26,15 +28,20 @@ void Ranger::heroInit(Point position, Scene* scene)//初始化状态，可自行修改
 	shieldNumberMax = 4;
 	shieldNumberNow = shieldNumberMax;
 	goldCoin = 0;
-	abilityInterval = 40;
+	name = "Ranger";
+	//abilityInterval = 40;
+	abilityTime = 0.2;
+	abilityBetweenTime = 1;
 	rotateDistance = 300;//设置技能距离
-	//共同数据初始化
-	commonDataInit();
+	//护盾恢复时间
+	recoverTime = 2;
 	//初始状态
 	this->setPosition(position);
-	sprite = Sprite::create("Map/Ranger1.png");
+	sprite = Sprite::create("character/Ranger.png");
 	//sprite->setPosition(position);
 	this->addChild(sprite, 1);
+	//sprite->setAnchorPoint(Vec2(0, 0));
+	//addChild(weaponNow,4);
 	setAction(1);
 	//加入摇杆并让rocker位于父节点中
 	auto rocker = HRocker::createHRocker("Map/Rocker.png", "Map/RockerBG.png", Point(150, 150), this);
@@ -51,13 +58,15 @@ void Ranger::heroInit(Point position, Scene* scene)//初始化状态，可自行修改
 	//初始化展示信息
 	initInformation();
 	//注册定时器,间隔为0.02秒
-	this->schedule(schedule_selector(Ranger::myUpdate), 0.02f);
+	this->schedule(schedule_selector(Ranger::myUpdate), betweenTime);
+	//共同数据初始化
+	commonDataInit();
 }
 
 Animate* Ranger::createAnimate(int status)
 {
 	auto* m_frameCache = SpriteFrameCache::getInstance();
-	m_frameCache->addSpriteFramesWithFile("Map/RangerPictures.plist", "Map/RangerPictures.png");//使用图集
+	m_frameCache->addSpriteFramesWithFile("character/RangerPictures.plist", "character/RangerPictures.png");//使用图集
 	Vector<SpriteFrame*> frameArry;
 	if (status == 1)
 	{
@@ -100,6 +109,9 @@ void Ranger::ability()
 	auto spawn = Spawn::create(animate, move, NULL);
 	auto sequence = Sequence::create(spawn, callFunc, NULL);
 	sprite->runAction(sequence);
+	//auto sequence = Sequence::create(animate, callFunc, NULL);
+	//sprite->runAction(sequence);
+	//this->runAction(move);
 	/*
 	if (withScene)
 	{
@@ -114,7 +126,7 @@ void Ranger::ability()
 Animate* Ranger::createRotateAnimate()
 {
 	auto* m_frameCache = SpriteFrameCache::getInstance();
-	m_frameCache->addSpriteFramesWithFile("Map/RangerRotatePictures.plist", "Map/RangerRotatePictures.png");//使用图集
+	m_frameCache->addSpriteFramesWithFile("character/RangerRotatePictures.plist", "character/RangerRotatePictures.png");//使用图集
 	Vector<SpriteFrame*> frameArry;
 	if (faceDirection == 1)//向右翻转
 	{
@@ -156,9 +168,19 @@ void Ranger::afterAbility()
 
 MoveBy* Ranger::abilityMoveBy()
 {
-	float r = sqrt(pow(dx_, 2)+ pow(dy_, 2));
-	dx_ = (dx_ / r) * rotateDistance/scale;
-	dy_ = (dy_ / r) * rotateDistance/scale;
+	if (dx_ != 0 || dy_ != 0)
+	{
+		float r = sqrt(pow(dx_, 2) + pow(dy_, 2));
+		dx_ = (dx_ / r) * rotateDistance / scale;
+		dy_ = (dy_ / r) * rotateDistance / scale;
+	}
+	//dx_ = (dx_ / r) * rotateDistance ;
+	//dy_ = (dy_ / r) * rotateDistance ;
 	auto move = MoveBy::create(0.2, Vec2(dx_, dy_));
 	return move;
+}
+//技能攻击效果
+void Ranger::removeAbilityFunction()
+{
+
 }
