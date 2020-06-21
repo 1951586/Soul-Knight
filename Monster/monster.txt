@@ -1,0 +1,16 @@
+1.如果场景的成员里有hero了，将场景作为参数传入即可
+如：
+auto snowman = Snowman::createMonsterSprite(Point(0, 0), this);
+	dynamicLayer->addChild(snowman, 5);
+若场景的成员里没有hero，则需要
+snowman->getHeroInstance
+
+2.获取怪物坐标坐标方式再次改变
+例：
+snowman->position（）.x
+
+3.怪物的初始化状态是活着，但是是“离场”的，看不见，不可触碰；
+   要怪物登场需使用
+   comeOnStage()函数；
+   登场才可见、可触碰；
+   怪物死亡后离场，尸体可见
